@@ -3,6 +3,10 @@
   'use strict';
 
   var CFG = window.TC_CONFIG || {};
+  var I18N = window.TC_I18N || { t: function (s) { return s; }, lang: 'ar', locale: 'ar-SA-u-ca-gregory' };
+  var T = I18N.t;
+  // المبلغ مع العملة بترتيب اللغة الحالية
+  function sar(n, d) { return I18N.lang === 'en' ? 'SAR ' + money(n, d) : money(n, d) + ' ر.س'; }
   var API = CFG.API_BASE || '/api/public';
   var VAT = typeof CFG.VAT_RATE === 'number' ? CFG.VAT_RATE : 0.15;
 
@@ -44,7 +48,7 @@
 
   function api(path, opts) {
     opts = opts || {};
-    var init = { method: opts.method || 'GET', headers: { 'Accept': 'application/json' }, credentials: 'same-origin' };
+    var init = { method: opts.method || 'GET', headers: { 'Accept': 'application/json', 'Accept-Language': I18N.lang }, credentials: 'same-origin' };
     if (opts.body) { init.headers['Content-Type'] = 'application/json'; init.body = JSON.stringify(opts.body); }
     return fetch(API + path, init).then(function (res) {
       return res.text().then(function (t) {
@@ -104,16 +108,13 @@
   // تُستخدم فقط إذا لم يستجب الـ API (الأسعار الرسمية تأتي من جدول plans)
   var FALLBACK_PLANS = [
     { code: 'basic', name: 'الأساسية', description: 'لمحل واحد يبدأ رحلته الرقمية', short: 'مستخدمان · فرع واحد',
-      users: '٢', branches: '١', einvoice: 'مشمولة',
       monthly_price: 199, yearly_price: 1990, highlight: false,
       features: ['مستخدمان', 'فرع واحد ومستودع واحد', 'المبيعات ونقاط البيع', 'المخزون والمشتريات', 'الفاتورة الإلكترونية (ZATCA)'] },
     { code: 'pro', name: 'الاحترافية', description: 'لشركات الجملة ومورّدي المقاولين', short: '٨ مستخدمين · ٣ فروع',
-      users: 'حتى ٨', branches: 'حتى ٣', einvoice: 'مشمولة',
       monthly_price: 399, yearly_price: 3990, highlight: true,
       features: ['حتى ٨ مستخدمين', 'حتى ٣ فروع ومستودعات متعددة', 'كل مزايا الأساسية', 'عروض الأسعار والأسعار المتعددة', 'المحاسبة الكاملة والتقارير الذكية', 'إرسال عبر واتساب والبريد'] },
     { code: 'enterprise', name: 'المؤسسات', description: 'للموزعين والشركات متعددة الفروع', short: 'مستخدمون وفروع غير محدودة',
-      users: 'غير محدود', branches: 'غير محدود', einvoice: 'مشمولة + API',
-      monthly_price: 799, yearly_price: 7990, highlight: false, self_serve: false,
+      monthly_price: 799, yearly_price: 7990, highlight: false,
       features: ['مستخدمون وفروع غير محدودة', 'كل مزايا الاحترافية', 'واجهات API للربط', 'صلاحيات متقدمة حسب الفرع', 'مدير حساب ودعم أولوية'] }
   ];
   var plansPromise = null;
@@ -127,7 +128,7 @@
     return plansPromise;
   }
   function planPrice(plan, cycle) { return Number(cycle === 'yearly' ? plan.yearly_price : plan.monthly_price); }
-  function cycleWord(cycle) { return cycle === 'yearly' ? 'سنة' : 'شهر'; }
+  function cycleWord(cycle) { return T(cycle === 'yearly' ? 'سنة' : 'شهر'); }
 
   function initPricing() {
     var holder = $('#plans');
@@ -139,23 +140,21 @@
     function render(plans) {
       holder.innerHTML = plans.map(function (p) {
         var price = planPrice(p, cycle);
-        var featured = !!p.highlight;
-        var trialBtn = featured ? 'btn btn-dark btn-block' : 'btn btn-primary btn-block';
-        var second = p.self_serve === false
-          ? '<a class="link" href="/#contact">أو تواصل مع المبيعات</a>'
-          : '<a class="link" href="/signup.html?plan=' + encodeURIComponent(p.code) + '&cycle=' + cycle + '&subscribe=1">أو اشترك مباشرة</a>';
-        return '<div class="price-row' + (featured ? ' featured' : '') + '">' +
-          '<div class="name">' + esc(p.name) + '<small>' + esc(p.description) + '</small></div>' +
-          '<div><span class="lbl">المستخدمون</span>' + esc(p.users || '—') + '</div>' +
-          '<div><span class="lbl">الفروع</span>' + esc(p.branches || '—') + '</div>' +
-          '<div><span class="lbl">الفاتورة الإلكترونية</span>' + esc(p.einvoice || 'مشمولة') + '</div>' +
-          '<div class="amount"><span class="lbl">' + (cycle === 'yearly' ? 'سنويًا' : 'شهريًا') + '</span>' + money(price) + '<small>ر.س</small></div>' +
-          '<div class="cta"><a class="' + trialBtn + '" href="/signup.html?plan=' + encodeURIComponent(p.code) + '">ابدأ مجانًا</a>' + second + '</div>' +
-          '</div>';
+        var cls = 'plan' + (p.highlight ? ' featured' : '');
+        var primaryBtn = p.highlight ? 'btn btn-light btn-block' : 'btn btn-outline-primary btn-block';
+        var subscribe = p.code === 'enterprise'
+          ? '<a class="link" href="/#contact">' + T('أو تواصل مع المبيعات') + '</a>'
+          : '<a class="link" href="/signup.html?plan=' + encodeURIComponent(p.code) + '&cycle=' + cycle + '&subscribe=1">' + T('أو اشترك مباشرة') + '</a>';
+        return '<article class="' + cls + '">' +
+          (p.highlight ? '<span class="badge">' + T('الأنسب لمعظم الشركات') + '</span>' : '') +
+          '<div><h3>' + esc(p.name) + '</h3><p class="desc">' + esc(p.description) + '</p></div>' +
+          '<div class="price"><b>' + money(price) + '</b><span>' + T('ر.س') + ' / ' + cycleWord(cycle) + '</span></div>' +
+          '<ul>' + (p.features || []).map(function (f) { return '<li>' + ICON_CHECK + '<span>' + esc(f) + '</span></li>'; }).join('') + '</ul>' +
+          '<div class="plan-actions"><a class="' + primaryBtn + '" href="/signup.html?plan=' + encodeURIComponent(p.code) + '">' + T('ابدأ التجربة المجانية') + '</a>' + subscribe + '</div>' +
+          '</article>';
       }).join('');
-      var col = $('#price-col-label'); if (col) col.textContent = cycle === 'yearly' ? 'السعر السنوي' : 'السعر الشهري';
-      if (note) note.textContent = (cycle === 'yearly' ? 'الاشتراك السنوي بسعر ١٠ أشهر. ' : 'وفّر شهرين بالاشتراك السنوي. ') +
-        'الأسعار لا تشمل ضريبة القيمة المضافة ١٥٪. الدفع بمدى وApple Pay وVisa/Mastercard وSTC Pay.';
+      if (note) note.textContent = T(cycle === 'yearly' ? 'الاشتراك السنوي يعادل ١٠ أشهر فقط. ' : 'وفّر شهرين بالاشتراك السنوي. ') +
+        T('الأسعار لا تشمل ضريبة القيمة المضافة ١٥٪. الدفع بمدى وApple Pay وVisa/Mastercard وSTC Pay.');
     }
 
     btns.forEach(function (b) {
@@ -197,7 +196,7 @@
       });
     }
     return turnstileReady.then(function () {
-      return window.turnstile.render(container, { sitekey: CFG.TURNSTILE_SITE_KEY, language: 'ar', theme: 'light' });
+      return window.turnstile.render(container, { sitekey: CFG.TURNSTILE_SITE_KEY, language: I18N.lang, theme: 'light' });
     });
   }
   function captchaToken(widgetId) {
@@ -366,7 +365,7 @@
     var wait = 60, timer = null;
     function tick() {
       if (wait <= 0) { resend.disabled = false; resend.textContent = 'أعد إرسال الرمز'; clearInterval(timer); return; }
-      resend.disabled = true; resend.textContent = 'إعادة الإرسال بعد ' + wait + ' ثانية'; wait--;
+      resend.disabled = true; resend.textContent = T('إعادة الإرسال بعد {n} ثانية', { n: wait }); wait--;
     }
     if (resend) {
       tick(); timer = setInterval(tick, 1000);
@@ -410,7 +409,7 @@
           var link = $('#tenant-link');
           link.href = d.tenant_url; link.textContent = 'ادخل إلى نظامك';
           $('#tenant-url').textContent = d.tenant_url.replace(/^https?:\/\//, '');
-          if (d.trial_ends_at) $('#trial-end').textContent = new Date(d.trial_ends_at).toLocaleDateString('ar-SA-u-ca-gregory', { day: 'numeric', month: 'long', year: 'numeric' });
+          if (d.trial_ends_at) $('#trial-end').textContent = new Date(d.trial_ends_at).toLocaleDateString(I18N.locale, { day: 'numeric', month: 'long', year: 'numeric' });
           done.hidden = false;
           return;
         }
@@ -461,15 +460,15 @@
       planHolder.innerHTML = plans.filter(function (x) { return x.code !== 'enterprise' || x.self_serve; }).map(function (x) {
         return '<button type="button" class="choice" data-plan="' + esc(x.code) + '" aria-pressed="' + (x.code === state.plan) + '">' +
           '<strong>' + esc(x.name) + '</strong><span>' + esc(x.short || x.description || '') + '</span>' +
-          '<em>' + money(planPrice(x, state.cycle)) + ' ر.س / ' + cycleWord(state.cycle) + '</em></button>';
+          '<em>' + sar(planPrice(x, state.cycle)) + ' / ' + cycleWord(state.cycle) + '</em></button>';
       }).join('');
       var sub = planPrice(p, state.cycle);
       var vat = Math.round(sub * VAT * 100) / 100;
-      $('#sum-label').textContent = 'الباقة ' + p.name + ' · ' + (state.cycle === 'yearly' ? 'سنوي' : 'شهري');
-      $('#sum-sub').textContent = money(sub, 2) + ' ر.س';
-      $('#sum-vat').textContent = money(vat, 2) + ' ر.س';
-      $('#sum-total').textContent = money(sub + vat, 2) + ' ر.س';
-      $('#sum-renew').textContent = 'يتجدد الاشتراك ' + (state.cycle === 'yearly' ? 'سنويًا' : 'شهريًا') + '، ويمكنك الإلغاء في أي وقت قبل التجديد.';
+      $('#sum-label').textContent = T('الباقة {name}', { name: T(p.name) }) + ' · ' + T(state.cycle === 'yearly' ? 'سنوي' : 'شهري');
+      $('#sum-sub').textContent = sar(sub, 2);
+      $('#sum-vat').textContent = sar(vat, 2);
+      $('#sum-total').textContent = sar(sub + vat, 2);
+      $('#sum-renew').textContent = T('يتجدد الاشتراك {cycle}، ويمكنك الإلغاء في أي وقت قبل التجديد.', { cycle: T(state.cycle === 'yearly' ? 'سنويًا' : 'شهريًا') });
       cycleBtns.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.cycle === state.cycle)); });
     }
     planHolder.addEventListener('click', function (ev) {
@@ -518,7 +517,7 @@
       $('#pay-step-1').hidden = true;
       $('#pay-step-2').hidden = false;
       payBtn.hidden = true;
-      $('#pay-total-final').textContent = money(s.amount / 100, 2) + ' ر.س';
+      $('#pay-total-final').textContent = sar(s.amount / 100, 2);
       var opts = {
         element: '.mysr-form',
         amount: s.amount,                       // بالهللات، من السيرفر
@@ -529,7 +528,7 @@
         methods: s.methods || ['creditcard', 'applepay', 'stcpay'],
         supported_networks: ['mada', 'visa', 'mastercard'],
         metadata: s.metadata || {},
-        language: 'ar',
+        language: I18N.lang,
         on_completed: function (payment) {
           // نُبلغ السيرفر بمعرّف الدفعة قبل التحويل، والسيرفر يتحقق منها لاحقًا من Moyasar مباشرة
           return api('/checkout/' + encodeURIComponent(s.checkout_id) + '/attach', { method: 'POST', body: { payment_id: payment.id } });
@@ -569,7 +568,7 @@
         }
       }).catch(function (e) {
         title.textContent = 'تعذّر تأكيد الدفع';
-        text.textContent = e.message + ' إن خُصم المبلغ فسيُفعَّل اشتراكك تلقائيًا خلال دقائق.';
+        text.textContent = T('{message} إن خُصم المبلغ فسيُفعَّل اشتراكك تلقائيًا خلال دقائق.', { message: T(e.message) });
         box.dataset.state = 'bad';
       });
     }
