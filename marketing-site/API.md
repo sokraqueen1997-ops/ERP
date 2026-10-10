@@ -56,7 +56,7 @@
 { "available": false, "reason": "subdomain_taken" | "subdomain_reserved" | "subdomain_invalid" }
 ```
 
-- **الصيغة المقبولة:** `^[a-z0-9]([a-z0-9-]{1,28}[a-z0-9])$`
+- **الصيغة المقبولة:** `^[a-z]([a-z0-9-]{1,28}[a-z0-9])$` (تبدأ بحرف، ولا تنتهي بشرطة). هذه الصيغة أضيق من فحص `provision-tenant.sh` (`^[a-z][a-z0-9-]{1,29}$`)، فكل رابط يقبله الموقع يقبله السكربت.
 - **قائمة الأسماء المحجوزة:** على الأقل `www, portal, admin, api, app, mail, smtp, ftp, ns1, ns2, status, docs, help, support, billing, pay, static, cdn, dev, staging, test, demo, tijara, tijaracrm`، إضافة إلى كل subdomain مستخدم حاليًا.
 - **Rate limit:** حوالي 30 طلبًا في الدقيقة لكل IP.
 

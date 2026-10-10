@@ -343,7 +343,7 @@
     'تعذّر التحقق من أنك لست روبوتًا. أعد المحاولة.': 'The robot check did not pass. Please try again.',
     'هذا البريد مسجّل لدينا مسبقًا. سجّل الدخول بدلًا من ذلك.': 'This email is already registered. Log in instead.',
     'رابط الشركة هذا مستخدم. جرّب اسمًا آخر.': 'This company link is taken. Try another name.',
-    'رابط الشركة يقبل أحرفًا إنجليزية صغيرة وأرقامًا وشرطة (-) فقط، من 3 إلى 30 حرفًا.': 'The company link accepts lowercase English letters, numbers and hyphens only, 3 to 30 characters.',
+    'رابط الشركة يبدأ بحرف إنجليزي صغير، ويقبل الأحرف والأرقام والشرطة (-) فقط، من 3 إلى 30 حرفًا.': 'The company link must start with a lowercase English letter and use only letters, numbers and hyphens, 3 to 30 characters.',
     'هذا الاسم محجوز. اختر اسمًا آخر.': 'This name is reserved. Choose another.',
     'الرمز غير صحيح.': 'That code is incorrect.',
     'انتهت صلاحية الرمز. اطلب رمزًا جديدًا.': 'The code has expired. Request a new one.',

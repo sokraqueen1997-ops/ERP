@@ -24,7 +24,7 @@ const PLANS = [
 ];
 const RESERVED = ['www', 'portal', 'admin', 'api', 'app', 'mail'];
 const TAKEN = ['alawwad', 'odai-magdi'];
-const SUB_RE = /^[a-z0-9]([a-z0-9-]{1,28}[a-z0-9])$/;
+const SUB_RE = /^[a-z]([a-z0-9-]{1,28}[a-z0-9])$/;
 const signups = new Map();
 const checkouts = new Map();
 const leads = [];
