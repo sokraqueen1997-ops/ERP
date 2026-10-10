@@ -1,6 +1,6 @@
 # نشر الموقع التسويقي على السيرفر
 
-**الشرط المسبق:** إكمال المرحلة 1، أي أن نظام الشركة يعمل على `portal.tijaracrm.com`.
+**الشرط المسبق:** نظام الشركة يعمل على `portal.tijaracrm.com` (منجز)، والـ API العام منشور في `erp-platform-backend` حسب `DEPLOY-SIGNUP.md` في مستودعه.
 
 **تنبيه:** لا تحوّل النطاق الرئيسي قبل أن تعمل نقاط `/api/public` (تفاصيلها في `API.md`). بدونها يعمل الموقع للعرض فقط، أما التسجيل والدفع فيظهران رسالة خطأ.
 
@@ -23,13 +23,13 @@ sudo rsync -a --delete /home/ubuntu/erp-repo/marketing-site/public/ /var/www/mar
 ## 3. Nginx
 
 ```bash
-sudo cp /etc/nginx/sites-available/<ملف tijaracrm الحالي> ~/nginx-backup-$(date +%F).conf
+sudo cp -r /etc/nginx/sites-available ~/nginx-backup-$(date +%F)
 echo 'limit_req_zone $binary_remote_addr zone=public_api:10m rate=10r/s;' | sudo tee /etc/nginx/conf.d/rate-limit.conf
 sudo cp /home/ubuntu/erp-repo/marketing-site/deploy/nginx-tijaracrm.conf /etc/nginx/sites-available/tijaracrm-marketing.conf
 ```
 
-- عدّل `__PUBLIC_API_UPSTREAM__` ومسارات الشهادة في الملف.
-- احذف `server_name tijaracrm.com` من إعداد النظام القديم، فقد أصبح على portal.
+- الملف جاهز: مسار الشهادة والـ API محددان، فلا تعديل مطلوب.
+- **ملاحظة:** حاليًا يعرض Nginx نظام الشركة على `tijaracrm.com` لأنه الموقع الافتراضي. بعد هذه الخطوة يعرض النطاق الرئيسي الموقع التسويقي، ومن يفتح `/login` يُحوَّل إلى portal. أبلغ موظفيك باستخدام `portal.tijaracrm.com`.
 
 ```bash
 sudo ln -s /etc/nginx/sites-available/tijaracrm-marketing.conf /etc/nginx/sites-enabled/
