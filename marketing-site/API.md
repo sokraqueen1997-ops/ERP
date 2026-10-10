@@ -33,6 +33,7 @@
 ```json
 { "plans": [
   { "code": "basic", "name": "الأساسية", "description": "لمحل واحد يبدأ رحلته الرقمية", "short": "مستخدمان · فرع واحد",
+    "users": "٢", "branches": "١", "einvoice": "مشمولة",
     "monthly_price": 199, "yearly_price": 1990, "highlight": false, "self_serve": true,
     "features": ["مستخدمان", "فرع واحد ومستودع واحد", "..."] }
 ] }

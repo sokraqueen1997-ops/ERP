@@ -104,13 +104,16 @@
   // تُستخدم فقط إذا لم يستجب الـ API (الأسعار الرسمية تأتي من جدول plans)
   var FALLBACK_PLANS = [
     { code: 'basic', name: 'الأساسية', description: 'لمحل واحد يبدأ رحلته الرقمية', short: 'مستخدمان · فرع واحد',
+      users: '٢', branches: '١', einvoice: 'مشمولة',
       monthly_price: 199, yearly_price: 1990, highlight: false,
       features: ['مستخدمان', 'فرع واحد ومستودع واحد', 'المبيعات ونقاط البيع', 'المخزون والمشتريات', 'الفاتورة الإلكترونية (ZATCA)'] },
     { code: 'pro', name: 'الاحترافية', description: 'لشركات الجملة ومورّدي المقاولين', short: '٨ مستخدمين · ٣ فروع',
+      users: 'حتى ٨', branches: 'حتى ٣', einvoice: 'مشمولة',
       monthly_price: 399, yearly_price: 3990, highlight: true,
       features: ['حتى ٨ مستخدمين', 'حتى ٣ فروع ومستودعات متعددة', 'كل مزايا الأساسية', 'عروض الأسعار والأسعار المتعددة', 'المحاسبة الكاملة والتقارير الذكية', 'إرسال عبر واتساب والبريد'] },
     { code: 'enterprise', name: 'المؤسسات', description: 'للموزعين والشركات متعددة الفروع', short: 'مستخدمون وفروع غير محدودة',
-      monthly_price: 799, yearly_price: 7990, highlight: false,
+      users: 'غير محدود', branches: 'غير محدود', einvoice: 'مشمولة + API',
+      monthly_price: 799, yearly_price: 7990, highlight: false, self_serve: false,
       features: ['مستخدمون وفروع غير محدودة', 'كل مزايا الاحترافية', 'واجهات API للربط', 'صلاحيات متقدمة حسب الفرع', 'مدير حساب ودعم أولوية'] }
   ];
   var plansPromise = null;
@@ -136,20 +139,22 @@
     function render(plans) {
       holder.innerHTML = plans.map(function (p) {
         var price = planPrice(p, cycle);
-        var cls = 'plan' + (p.highlight ? ' featured' : '');
-        var primaryBtn = p.highlight ? 'btn btn-light btn-block' : 'btn btn-outline-primary btn-block';
-        var subscribe = p.code === 'enterprise'
+        var featured = !!p.highlight;
+        var trialBtn = featured ? 'btn btn-dark btn-block' : 'btn btn-primary btn-block';
+        var second = p.self_serve === false
           ? '<a class="link" href="/#contact">أو تواصل مع المبيعات</a>'
           : '<a class="link" href="/signup.html?plan=' + encodeURIComponent(p.code) + '&cycle=' + cycle + '&subscribe=1">أو اشترك مباشرة</a>';
-        return '<article class="' + cls + '">' +
-          (p.highlight ? '<span class="badge">الأنسب لمعظم الشركات</span>' : '') +
-          '<div><h3>' + esc(p.name) + '</h3><p class="desc">' + esc(p.description) + '</p></div>' +
-          '<div class="price"><b>' + money(price) + '</b><span>ر.س / ' + cycleWord(cycle) + '</span></div>' +
-          '<ul>' + (p.features || []).map(function (f) { return '<li>' + ICON_CHECK + '<span>' + esc(f) + '</span></li>'; }).join('') + '</ul>' +
-          '<div class="plan-actions"><a class="' + primaryBtn + '" href="/signup.html?plan=' + encodeURIComponent(p.code) + '">ابدأ التجربة المجانية</a>' + subscribe + '</div>' +
-          '</article>';
+        return '<div class="price-row' + (featured ? ' featured' : '') + '">' +
+          '<div class="name">' + esc(p.name) + '<small>' + esc(p.description) + '</small></div>' +
+          '<div><span class="lbl">المستخدمون</span>' + esc(p.users || '—') + '</div>' +
+          '<div><span class="lbl">الفروع</span>' + esc(p.branches || '—') + '</div>' +
+          '<div><span class="lbl">الفاتورة الإلكترونية</span>' + esc(p.einvoice || 'مشمولة') + '</div>' +
+          '<div class="amount"><span class="lbl">' + (cycle === 'yearly' ? 'سنويًا' : 'شهريًا') + '</span>' + money(price) + '<small>ر.س</small></div>' +
+          '<div class="cta"><a class="' + trialBtn + '" href="/signup.html?plan=' + encodeURIComponent(p.code) + '">ابدأ مجانًا</a>' + second + '</div>' +
+          '</div>';
       }).join('');
-      if (note) note.textContent = (cycle === 'yearly' ? 'الاشتراك السنوي يعادل ١٠ أشهر فقط. ' : 'وفّر شهرين بالاشتراك السنوي. ') +
+      var col = $('#price-col-label'); if (col) col.textContent = cycle === 'yearly' ? 'السعر السنوي' : 'السعر الشهري';
+      if (note) note.textContent = (cycle === 'yearly' ? 'الاشتراك السنوي بسعر ١٠ أشهر. ' : 'وفّر شهرين بالاشتراك السنوي. ') +
         'الأسعار لا تشمل ضريبة القيمة المضافة ١٥٪. الدفع بمدى وApple Pay وVisa/Mastercard وSTC Pay.';
     }
 
