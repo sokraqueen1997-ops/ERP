@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>الاشتراك والدفع | تجارة ERP</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0E5C63">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Readex+Pro:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="container">
+    <a class="brand" href="/" aria-label="تجارة ERP — الرئيسية">
+      <span class="brand-mark" aria-hidden="true"><svg class="icon" width="22" height="22" viewBox="0 0 24 24" stroke-width="2"><path d="M4 7h10a4 4 0 0 1 4 4v9"/><path d="M4 3v8"/><path d="M14 20h8"/></svg></span>
+      <span class="brand-name">تجارة <span>ERP</span></span>
+    </a>
+    <span class="small muted" style="display:flex;align-items:center;gap:6px"><svg class="icon" width="18" height="18" viewBox="0 0 24 24" stroke-width="2" style="color:var(--primary)" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>دفع آمن عبر Moyasar</span>
+  </div>
+</header>
+
+<!-- بدون رابط اشتراك: نوجّه لإنشاء الحساب أولًا -->
+<main id="checkout-noaccount" class="container" style="padding-block:72px 96px" hidden>
+  <div class="box stack center" style="max-width:560px;margin:0 auto">
+    <h1 style="font-size:28px">أنشئ حسابك أولًا</h1>
+    <p class="muted">الاشتراك مرتبط ببيئة شركتك. أنشئ الحساب في دقيقة، ثم ننقلك مباشرة لإتمام الدفع.</p>
+    <a class="btn btn-primary btn-lg btn-block" href="/signup.html?subscribe=1&plan=pro&cycle=yearly">أنشئ حسابي وتابع للدفع</a>
+    <p class="small muted">مشترك حاليًا أو في فترة التجربة؟ ستجد رابط الاشتراك في بريد التذكير، أو من إعدادات الاشتراك داخل نظامك.</p>
+  </div>
+</main>
+
+<main id="checkout" class="container split">
+  <div class="split-main">
+    <div>
+      <h1 style="font-size:32px">إتمام الاشتراك</h1>
+      <p class="muted small">الحساب: <span id="checkout-account" class="sub-preview">—</span></p>
+    </div>
+
+    <div id="pay-step-1" class="stack" style="gap:20px">
+      <section class="box stack">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+          <h2 style="margin:0">١. اختر الباقة</h2>
+          <div class="toggle" role="group" aria-label="مدة الاشتراك" style="background:var(--bg)">
+            <button type="button" data-cycle="monthly" aria-pressed="false">شهري</button>
+            <button type="button" data-cycle="yearly" aria-pressed="true">سنوي · شهران مجانًا</button>
+          </div>
+        </div>
+        <div id="checkout-plans" class="choice-grid" role="group" aria-label="الباقة"></div>
+        <p class="xsmall muted">باقة المؤسسات عبر فريق المبيعات: <a href="/#contact">تواصل معنا</a>.</p>
+      </section>
+
+      <section class="box">
+        <h2>٢. بيانات الفوترة</h2>
+        <form id="billing-form" class="form-grid" novalidate>
+          <label class="field">اسم المنشأة كما في السجل<input class="input" name="company_name" type="text" autocomplete="organization" required maxlength="160"><span class="error-text" data-error-for="company_name"></span></label>
+          <label class="field">البريد لاستلام الفواتير<input class="input ltr" name="billing_email" type="email" autocomplete="email" required maxlength="160"><span class="error-text" data-error-for="billing_email"></span></label>
+          <label class="field">الرقم الضريبي (اختياري)<input class="input ltr" name="vat_number" type="text" inputmode="numeric" placeholder="3xxxxxxxxxxxxx3" maxlength="15"><span class="hint">لإصدار فاتورة ضريبية باسم منشأتك.</span><span class="error-text" data-error-for="vat_number"></span></label>
+          <label class="field">المدينة<input class="input" name="city" type="text" autocomplete="address-level2" maxlength="80"></label>
+        </form>
+      </section>
+    </div>
+
+    <section id="pay-step-2" class="box stack" hidden>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+        <h2 style="margin:0">٣. الدفع</h2>
+        <button id="pay-back" type="button" class="btn btn-outline">تعديل الطلب</button>
+      </div>
+      <p class="muted small">المبلغ المستحق: <strong id="pay-total-final"></strong>. اختر مدى أو البطاقة أو Apple Pay أو STC Pay.</p>
+      <div class="mysr-form" dir="ltr"></div>
+      <p class="xsmall muted">بيانات البطاقة تُعالج مباشرة لدى Moyasar ولا تمر على خوادمنا.</p>
+    </section>
+  </div>
+
+  <aside class="split-side">
+    <div class="box stack">
+      <h2 style="margin:0">ملخص الطلب</h2>
+      <div class="summary-row"><span id="sum-label">—</span><strong id="sum-sub">—</strong></div>
+      <div class="summary-row muted"><span>ضريبة القيمة المضافة ١٥٪</span><span id="sum-vat">—</span></div>
+      <div class="summary-total"><strong>الإجمالي</strong><b id="sum-total">—</b></div>
+      <p id="sum-renew" class="xsmall muted"></p>
+      <div id="checkout-alert" class="alert" hidden></div>
+      <button id="pay-btn" class="btn btn-primary btn-lg btn-block" type="button">متابعة إلى الدفع</button>
+      <p class="xsmall muted">بالمتابعة، أنت توافق على <a href="/terms.html" target="_blank">الشروط والأحكام</a> و<a href="/refund.html" target="_blank">سياسة الاسترجاع</a>. تصلك فاتورة ضريبية إلكترونية بعد الدفع.</p>
+      <div class="methods"><span>مدى</span><span>Visa</span><span>Mastercard</span><span>Apple Pay</span><span>STC Pay</span></div>
+    </div>
+  </aside>
+</main>
+
+<script src="/assets/config.js"></script>
+<script src="/assets/app.js" defer></script>
+</body>
+</html>

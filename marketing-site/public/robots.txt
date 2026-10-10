@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /verify.html
+Disallow: /setup.html
+Disallow: /checkout.html
+Disallow: /payment-result.html
+Sitemap: https://tijaracrm.com/sitemap.xml

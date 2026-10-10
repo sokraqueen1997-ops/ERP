@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ابدأ تجربتك المجانية | تجارة ERP</title>
+<meta name="description" content="أنشئ حساب تجارة ERP وجرّب النظام مجانًا لمدة ٧ أيام بدون بطاقة ائتمانية.">
+<link rel="canonical" href="https://tijaracrm.com/signup.html">
+<meta name="theme-color" content="#0E5C63">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Readex+Pro:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="container">
+    <a class="brand" href="/" aria-label="تجارة ERP — الرئيسية">
+      <span class="brand-mark" aria-hidden="true"><svg class="icon" width="22" height="22" viewBox="0 0 24 24" stroke-width="2"><path d="M4 7h10a4 4 0 0 1 4 4v9"/><path d="M4 3v8"/><path d="M14 20h8"/></svg></span>
+      <span class="brand-name">تجارة <span>ERP</span></span>
+    </a>
+    <span class="small muted">لديك حساب؟ <a data-portal href="https://portal.tijaracrm.com" style="font-weight:600">سجّل الدخول</a></span>
+  </div>
+</header>
+
+<main class="container split">
+  <section class="split-main">
+    <div class="box">
+      <h1 id="signup-title" style="font-size:32px;margin-bottom:6px">ابدأ تجربتك المجانية</h1>
+      <p id="signup-lead" class="muted" style="margin-bottom:28px">٧ أيام بكامل مزايا الباقة الاحترافية. لا نطلب بطاقة دفع.</p>
+
+      <form id="signup-form" class="form-grid" novalidate>
+        <input type="hidden" name="plan" value="pro">
+        <input type="hidden" name="intent" value="trial">
+        <input type="hidden" name="cycle" value="yearly">
+
+        <label class="field">الاسم الكامل
+          <input class="input" name="full_name" type="text" autocomplete="name" required maxlength="100">
+          <span class="error-text" data-error-for="full_name"></span>
+        </label>
+        <label class="field">رقم الجوال
+          <span class="affix"><span>+966</span><input name="phone" type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="5xxxxxxxx" required maxlength="10"></span>
+          <span class="error-text" data-error-for="phone"></span>
+        </label>
+        <label class="field full">البريد الإلكتروني للعمل
+          <input class="input ltr" name="email" type="email" autocomplete="email" placeholder="name@company.sa" required maxlength="160">
+          <span class="hint">سنرسل إليه رمز التحقق، وهو نفسه بريد الدخول إلى النظام.</span>
+          <span class="error-text" data-error-for="email"></span>
+        </label>
+        <label class="field">اسم الشركة
+          <input class="input" name="company_name" type="text" autocomplete="organization" required maxlength="120">
+          <span class="error-text" data-error-for="company_name"></span>
+        </label>
+        <label class="field">نوع النشاط
+          <select class="input" name="business_type">
+            <option value="retail">محل تجزئة أدوات صحية</option>
+            <option value="wholesale">تاجر جملة</option>
+            <option value="distributor">موزع أدوات صحية</option>
+            <option value="contractor">مقاولات سباكة</option>
+            <option value="other">نشاط آخر</option>
+          </select>
+        </label>
+        <label class="field full">رابط نظام شركتك
+          <span class="affix"><input name="subdomain" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="yourcompany" required maxlength="30"><span>.tijaracrm.com</span></span>
+          <span class="hint">ستدخل نظامك من: <span id="sub-preview" class="sub-preview">https://yourcompany.tijaracrm.com</span></span>
+          <span id="sub-status" class="sub-status" aria-live="polite"></span>
+          <span class="error-text" data-error-for="subdomain"></span>
+        </label>
+
+        <input class="hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <div id="signup-captcha" class="captcha full"></div>
+
+        <label class="check full"><input type="checkbox" name="accept_terms" required><span>أوافق على <a href="/terms.html" target="_blank">الشروط والأحكام</a> و<a href="/privacy.html" target="_blank">سياسة الخصوصية</a></span></label>
+        <span class="error-text full" data-error-for="accept_terms"></span>
+
+        <div id="signup-alert" class="alert full" hidden></div>
+        <button class="btn btn-primary btn-lg full" type="submit">أنشئ حسابي وأرسل رمز التحقق</button>
+      </form>
+    </div>
+  </section>
+
+  <aside class="split-side">
+    <div class="box-dark">
+      <h2>ما الذي يحدث بعد التسجيل؟</h2>
+      <ol class="num-list">
+        <li><span class="n">1</span><span>تُدخل رمز التحقق المرسل إلى بريدك.</span></li>
+        <li><span class="n">2</span><span>نجهّز قاعدة بيانات ورابطًا خاصًا بشركتك تلقائيًا.</span></li>
+        <li><span class="n">3</span><span>يصلك بريد الترحيب بالرابط، وتدخل بلا كلمة مرور.</span></li>
+      </ol>
+    </div>
+    <div class="box stack" style="gap:10px">
+      <strong style="font-family:var(--font-display);font-size:18px">خلال التجربة تحصل على</strong>
+      <span>المخزون والمبيعات ونقاط البيع</span>
+      <span>عروض الأسعار والمحاسبة والتقارير</span>
+      <span>الفاتورة الإلكترونية في بيئة الاختبار</span>
+      <span>دعم فني عبر واتساب والبريد</span>
+    </div>
+  </aside>
+</main>
+
+<footer class="site-footer">
+  <div class="container footer-bottom">
+    <span>© <span id="year">2026</span> تجارة ERP</span>
+    <nav aria-label="روابط قانونية"><a href="/terms.html">الشروط والأحكام</a><a href="/privacy.html">سياسة الخصوصية</a><a href="/refund.html">سياسة الاسترجاع</a></nav>
+  </div>
+</footer>
+<script src="/assets/config.js"></script>
+<script src="/assets/app.js" defer></script>
+</body>
+</html>
