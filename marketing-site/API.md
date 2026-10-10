@@ -154,7 +154,8 @@
 
 ```json
 { "tenant_url": "https://acme.tijaracrm.com", "company_name": "…", "billing_email": "…", "vat_number": "", "city": "",
-  "current_plan": "pro", "status": "trial|active|expired" }
+  "current_plan": "pro", "current_cycle": "yearly", "status": "trial|active|expired|locked",
+  "access_ends_at": "2026-10-17T12:00:00Z" }
 ```
 
 - **عند token غير صالح:** `401 invalid_token`.
@@ -182,13 +183,29 @@
   "callback_url": "https://tijaracrm.com/payment-result.html?checkout=chk_…",
   "methods": ["creditcard", "applepay", "stcpay"],
   "metadata": { "checkout_id": "chk_…", "tenant_id": "…", "plan": "pro", "cycle": "yearly" },
-  "save_card": true,
+  "save_card": false,
   "apple_pay": { "country": "SA", "label": "تجارة ERP", "validate_merchant_url": "https://api.moyasar.com/v1/applepay/initiate" }
 }
 ```
 
 - **قبل الإطلاق:** راجع وثائق Moyasar الحالية للأسماء الدقيقة لخيارات `Moyasar.init`، مثل `save_card` (حفظ البطاقة للتجديد) وإعداد Apple Pay، وطابِق `app.js` (الدالة `mountMoyasar`) إن اختلفت.
 - **Apple Pay:** يتطلب التحقق من النطاق `tijaracrm.com` في لوحة Moyasar، بما في ذلك ملف `/.well-known/apple-developer-merchantid-domain-association`.
+
+- **`methods`:** من `MOYASAR_METHODS` على السيرفر. الافتراضي `creditcard,stcpay`، ويُضاف `applepay` بعد التحقق من النطاق. `apple_pay` لا يُرسل إلا إذا كان مفعّلًا.
+- **التجديد:** لا يوجد خصم تلقائي (`save_card: false`). التجديد يتم عبر رابط في بريد التذكير.
+- **بداية الفترة:** تبدأ الفترة المدفوعة عند انتهاء الفترة الحالية، سواء كانت تجربة أو اشتراكًا، أو من الآن إن كانت منتهية.
+- **الأخطاء:** `invalid_token`، و`plan_unavailable`، و`account_locked` (حساب موقوف أو ملغى)، و`payments_unavailable` (المفاتيح غير مضبوطة).
+
+### `POST /checkout/link`
+
+```json
+{ "subdomain": "acme", "email": "owner@acme.sa", "captcha_token": "…", "website": "" }
+```
+
+- **وظيفته:** يرسل رابط اشتراك جديد صالحًا 30 يومًا إلى البريد، إن طابق بريد التواصل أو الفوترة أو التسجيل.
+- **الرد:** دائمًا `200 { "ok": true }`، حتى لا يكشف وجود الحسابات.
+- **الحدود:** 5 في الساعة لكل IP، و3 في اليوم لكل بريد.
+- **أين يظهر:** صفحة `checkout.html` بدون token، أو عند token منتهي.
 
 ### `POST /checkout/:checkout_id/attach`
 
@@ -214,7 +231,7 @@
    - إنشاء أو تمديد `subscriptions` (`current_period_end` من نهاية الفترة الحالية أو من الآن، أيهما أبعد).
    - إعادة تفعيل الـ tenant إن كان موقوفًا.
    - حفظ token البطاقة إن وُجد، للتجديد.
-4. أصدر الفاتورة الضريبية وأرسلها بالبريد. ضعها في طابور، ولا تجعلها تُعطّل الرد.
+4. أرسل إيصال الدفع للعميل، وأرسل لصاحب المنصة بريدًا ببيانات الفوترة ليصدر الفاتورة الضريبية. لا يعطّل أيٌّ منهما الرد.
 
 **الردود:**
 
@@ -228,6 +245,8 @@
 
 (تستدعيه Moyasar، وليس الواجهة.)
 
+- **الرابط:** `https://tijaracrm.com/api/public/webhooks/moyasar`
+- **الردود:** `200` عند المعالجة، و`401` عند سر خاطئ، و`503` إذا تعذّر الوصول إلى Moyasar، فيعيد المحاولة لاحقًا.
 - **التحقق:** قارن `secret_token` في جسم الطلب بـ `MOYASAR_WEBHOOK_SECRET` باستخدام مقارنة آمنة زمنيًا (timing-safe).
 - **المعالجة:** نفس منطق `confirm`، مع جلب الدفعة من API Moyasar وعدم الاعتماد على جسم الـ webhook. هذا يغطي حالة إغلاق المستخدم للمتصفح قبل الرجوع.
 
@@ -241,6 +260,11 @@ MOYASAR_SECRET_KEY=
 MOYASAR_WEBHOOK_SECRET=
 TURNSTILE_SECRET=
 CHECKOUT_TOKEN_SECRET=
+MOYASAR_METHODS=creditcard,stcpay
+SITE_URL=https://tijaracrm.com
+BILLING_SCAN_MINUTES=15
+TRIAL_REMINDER_DAYS=2
+RENEWAL_REMINDER_DAYS=7
 LEADS_NOTIFY_EMAIL=
 VAT_RATE=0.15
 TRIAL_DAYS=7

@@ -40,8 +40,11 @@
     invalid_code: 'الرمز غير صحيح.',
     code_expired: 'انتهت صلاحية الرمز. اطلب رمزًا جديدًا.',
     too_many_attempts: 'تجاوزت عدد المحاولات المسموح. اطلب رمزًا جديدًا.',
-    invalid_token: 'رابط الاشتراك غير صالح أو منتهي. اطلب رابطًا جديدًا من داخل نظامك.',
+    invalid_token: 'رابط الاشتراك غير صالح أو منتهي. اطلب رابطًا جديدًا من صفحة الاشتراك.',
     payment_failed: 'لم تتم عملية الدفع. لم يُخصم أي مبلغ، ويمكنك المحاولة مرة أخرى.',
+    plan_unavailable: 'هذه الباقة غير متاحة للاشتراك المباشر. اختر باقة أخرى أو تواصل معنا.',
+    account_locked: 'هذا الحساب موقوف. تواصل معنا لإعادة تفعيله.',
+    payments_unavailable: 'الدفع الإلكتروني غير متاح مؤقتًا. حاول بعد قليل أو تواصل معنا.',
     validation: 'راجِع الحقول المظللة.',
     unknown: 'حدث خطأ غير متوقع. حاول مرة أخرى أو تواصل معنا.'
   };
@@ -468,7 +471,7 @@
       $('#sum-sub').textContent = sar(sub, 2);
       $('#sum-vat').textContent = sar(vat, 2);
       $('#sum-total').textContent = sar(sub + vat, 2);
-      $('#sum-renew').textContent = T('يتجدد الاشتراك {cycle}، ويمكنك الإلغاء في أي وقت قبل التجديد.', { cycle: T(state.cycle === 'yearly' ? 'سنويًا' : 'شهريًا') });
+      $('#sum-renew').textContent = T(state.cycle === 'yearly' ? 'مدة الاشتراك سنة تبدأ بعد انتهاء فترتك الحالية، ونذكّرك قبل نهايتها للتجديد. لا خصم تلقائي.' : 'مدة الاشتراك شهر يبدأ بعد انتهاء فترتك الحالية، ونذكّرك قبل نهايته للتجديد. لا خصم تلقائي.');
       cycleBtns.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.cycle === state.cycle)); });
     }
     planHolder.addEventListener('click', function (ev) {
@@ -486,8 +489,14 @@
       if (ctx.city) f.elements.city.value = ctx.city;
       var acc = $('#checkout-account'); if (acc && ctx.tenant_url) acc.textContent = ctx.tenant_url.replace(/^https?:\/\//, '');
     }).catch(function (e) {
+      if (e.code === 'invalid_token') {
+        // رابط منتهي: نعرض نموذج طلب رابط جديد بدل صفحة دفع لا تعمل
+        $('#checkout-noaccount').hidden = false;
+        root.hidden = true;
+        showAlert($('#link-alert'), e.message);
+        return;
+      }
       showAlert(alertEl, e.message);
-      if (e.code === 'invalid_token') { $('#pay-btn').disabled = true; }
     });
 
     loadPlans().then(function (p) { plans = p; render(); });
@@ -542,6 +551,36 @@
     if (back) back.addEventListener('click', function () { $('#pay-step-2').hidden = true; $('#pay-step-1').hidden = false; payBtn.hidden = false; $('.mysr-form').innerHTML = ''; busy(payBtn, false); });
   }
 
+  /* ---------- طلب رابط اشتراك جديد ---------- */
+  function initLinkForm() {
+    var form = $('#link-form');
+    if (!form) return;
+    var alertEl = $('#link-alert');
+    var widget = null;
+    initCaptcha($('#link-captcha')).then(function (id) { widget = id; });
+    form.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var d = formData(form);
+      d.subdomain = (d.subdomain || '').toLowerCase().trim();
+      var errs = {};
+      if (!SUB_RE.test(d.subdomain)) errs.subdomain = 'اكتب رابط نظام شركتك كما سجّلته.';
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(d.email)) errs.email = 'بريد غير صحيح.';
+      markFields(form, errs);
+      if (Object.keys(errs).length) return;
+      d.captcha_token = captchaToken(widget);
+      d.website = form.elements.website ? form.elements.website.value : '';
+      var btn = $('button[type=submit]', form);
+      busy(btn, true);
+      api('/checkout/link', { method: 'POST', body: d }).then(function () {
+        showAlert(alertEl, 'إن كانت البيانات مطابقة لحساب لدينا، يصلك رابط الاشتراك على بريدك خلال دقائق.', 'ok');
+      }).catch(function (e) {
+        markFields(form, e.fields);
+        showAlert(alertEl, e.message);
+        captchaReset(widget);
+      }).then(function () { busy(btn, false); });
+    });
+  }
+
   /* ---------- نتيجة الدفع ---------- */
   function initPaymentResult() {
     var box = $('#result');
@@ -555,14 +594,15 @@
       api('/checkout/confirm', { method: 'POST', body: { checkout_id: checkout, payment_id: paymentId } }).then(function (d) {
         if (d.status === 'paid') {
           title.textContent = 'تم الاشتراك بنجاح';
-          text.textContent = 'شكرًا لك. فعّلنا باقتك، وأرسلنا الفاتورة الضريبية إلى بريدك.';
+          text.textContent = T('شكرًا لك. فعّلنا باقتك وأرسلنا إيصال الدفع إلى بريدك، وتصلك الفاتورة الضريبية خلال يوم عمل.');
           action.href = d.tenant_url; action.textContent = 'ادخل إلى نظامك'; action.hidden = false;
           box.dataset.state = 'ok';
         } else if (d.status === 'pending' && tries < 10) {
           tries++; setTimeout(confirm, 3000);
         } else {
           title.textContent = 'لم تكتمل عملية الدفع';
-          text.textContent = d.message || MESSAGES.payment_failed;
+          // سبب الرفض من البنك يصل بالإنجليزية غالبًا، فنعرضه بين قوسين بعد رسالتنا
+          text.textContent = T(MESSAGES.payment_failed) + (d.message ? ' (' + d.message + ')' : '');
           if (d.retry_url) { action.href = d.retry_url; action.textContent = 'حاول مرة أخرى'; action.hidden = false; }
           box.dataset.state = 'bad';
         }
@@ -593,6 +633,6 @@
 
   document.addEventListener('DOMContentLoaded', function () {
     initHeader(); initLinks(); initPricing(); initLeadForm();
-    initSignup(); initVerify(); initSetup(); initCheckout(); initPaymentResult();
+    initSignup(); initVerify(); initSetup(); initCheckout(); initLinkForm(); initPaymentResult();
   });
 })();

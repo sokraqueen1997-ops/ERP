@@ -31,7 +31,22 @@
     <h1 style="font-size:28px">أنشئ حسابك أولًا</h1>
     <p class="muted">الاشتراك مرتبط ببيئة شركتك. أنشئ الحساب في دقيقة، ثم ننقلك مباشرة لإتمام الدفع.</p>
     <a class="btn btn-primary btn-lg btn-block" href="/signup.html?subscribe=1&plan=pro&cycle=yearly">أنشئ حسابي وتابع للدفع</a>
-    <p class="small muted">مشترك حاليًا أو في فترة التجربة؟ ستجد رابط الاشتراك في بريد التذكير، أو من إعدادات الاشتراك داخل نظامك.</p>
+  </div>
+
+  <div class="box stack" style="max-width:560px;margin:24px auto 0">
+    <h2 style="font-size:22px;margin:0">لديك حساب؟ نرسل لك رابط الاشتراك</h2>
+    <p class="small muted">للاشتراك أثناء التجربة أو التجديد بعد انتهاء الاشتراك: اكتب رابط نظام شركتك والبريد المسجّل، ونرسل الرابط إلى بريدك.</p>
+    <form id="link-form" class="stack" novalidate>
+      <label class="field">رابط نظام شركتك
+        <span class="affix"><input name="subdomain" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="yourcompany" required maxlength="30"><span>.tijaracrm.com</span></span>
+        <span class="error-text" data-error-for="subdomain"></span>
+      </label>
+      <label class="field">البريد المسجّل<input class="input ltr" name="email" type="email" autocomplete="email" required maxlength="160"><span class="error-text" data-error-for="email"></span></label>
+      <input class="hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <div id="link-captcha" class="captcha"></div>
+      <div id="link-alert" class="alert" hidden></div>
+      <button class="btn btn-outline btn-block" type="submit">أرسل رابط الاشتراك</button>
+    </form>
   </div>
 </main>
 
@@ -86,7 +101,7 @@
       <p id="sum-renew" class="xsmall muted"></p>
       <div id="checkout-alert" class="alert" hidden></div>
       <button id="pay-btn" class="btn btn-primary btn-lg btn-block" type="button">متابعة إلى الدفع</button>
-      <p class="xsmall muted">بالمتابعة، أنت توافق على <a href="/terms.html" target="_blank">الشروط والأحكام</a> و<a href="/refund.html" target="_blank">سياسة الاسترجاع</a>. تصلك فاتورة ضريبية إلكترونية بعد الدفع.</p>
+      <p class="xsmall muted">بالمتابعة، أنت توافق على <a href="/terms.html" target="_blank">الشروط والأحكام</a> و<a href="/refund.html" target="_blank">سياسة الاسترجاع</a>. يصلك إيصال الدفع فورًا، والفاتورة الضريبية الإلكترونية خلال يوم عمل.</p>
       <div class="methods"><span>مدى</span><span>Visa</span><span>Mastercard</span><span>Apple Pay</span><span>STC Pay</span></div>
     </div>
   </aside>
